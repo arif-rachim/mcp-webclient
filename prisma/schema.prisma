@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id String @id @default(uuid())
+  username String @unique
+  email String @unique
+  passwordHash String @map("password_hash")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  conversations UserConversation[]
+  messages Message[]
+
+  @@map("users")
+}
+
+// Conversation model
+model Conversation {
+  id String @id @default(uuid())
+  title String?
+  type String @default("one-on-one") // 'one-on-one' or 'group'
+  model String? // Ollama model name (e.g., 'llama3.1')
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users UserConversation[]
+  messages Message[]
+
+  @@map("conversations")
+}
+
+// User-Conversation junction table (many-to-many)
+model UserConversation {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  conversationId String @map("conversation_id")
+  joinedAt DateTime @default(now()) @map("joined_at")
+  lastReadAt DateTime @default(now()) @map("last_read_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, conversationId])
+  @@index([userId])
+  @@index([conversationId])
+  @@map("user_conversations")
+}
+
+// Message model
+model Message {
+  id String @id @default(uuid())
+  conversationId String @map("conversation_id")
+  userId String? @map("user_id")
+  content String
+  role String @default("user") // 'user', 'assistant', 'system'
+  metadata Json @default("{}")  // For MCP tool calls, tokens, etc.
+  createdAt DateTime @default(now()) @map("created_at")
+  editedAt DateTime? @map("edited_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, createdAt(sort: Desc)])
+  @@index([userId])
+  @@map("messages")
+}

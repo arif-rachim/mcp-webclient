@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pkill:*)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma init)",
+      "Bash(npx prisma:*)",
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "WebFetch(domain:gofastmcp.com)",
+      "WebFetch(domain:mcpcat.io)",
+      "WebFetch(domain:github.com)",
+      "Bash(python -c:*)",
+      "WebFetch(domain:docs.ollama.com)",
+      "Bash(cat:*)",
+      "WebFetch(domain:ollama.com)",
+      "WebFetch(domain:developers.redhat.com)",
+      "WebFetch(domain:fastmcp.wiki)",
+      "WebFetch(domain:workos.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
